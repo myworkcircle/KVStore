@@ -137,9 +137,26 @@ func (ds *DiskStore) checkIfThresholdCrossed() bool {
 }
 
 func (ds *DiskStore) Compaction() error {
-	entries, err := os.ReadDir(ds.directoryName)
+	files, err := ds.listFilesInDir()
 	if err != nil {
 		return err
+	}
+	for _, file := range files {
+		if file.Name() != ds.activeFileID {
+			readFile, readErr := os.ReadFile(file.Name())
+			if readErr != nil {
+				return err
+			}
+
+		}
+	}
+	return nil
+}
+
+func (ds *DiskStore) listFilesInDir() ([]os.FileInfo, error) {
+	entries, err := os.ReadDir(ds.directoryName)
+	if err != nil {
+		return nil, err
 	}
 
 	filesInfo := make([]os.FileInfo, len(entries))
@@ -150,6 +167,8 @@ func (ds *DiskStore) Compaction() error {
 		}
 		filesInfo = append(filesInfo, file)
 	}
+	return filesInfo, nil
+}
 
-	return nil
+func (ds *DiskStore) close() {
 }

@@ -18,17 +18,13 @@ func (h *Handler) put(key, value string) error {
 		KeySize:   keySize,
 		ValueSize: valueSize,
 	}
-	//fileValue := Record{
-	//	Header: header,
-	//	Value:  value,
-	//	Key:    key,
-	//}
+
 	serialisedRecord, err := ConvertToBytes(header)
 	if err != nil {
 		return err
 	}
 
-	pos, err := h.diskStore.AppendToFile(serialisedRecord, key, []byte(value))
+	pos, err := h.diskStore.AppendToFile(serialisedRecord, key, value)
 	if err != nil {
 		return err
 	}

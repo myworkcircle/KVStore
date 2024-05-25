@@ -1,11 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
-	ds := DiskStore{}
-	ds.Open("data_store")
 	keyDir := KeyValueStore{map[string]MetaData{}}
+	ds := DiskStore{keyDir: &keyDir}
+	ds.Open("data_store")
 	handler := Handler{
 		diskStore:     &ds,
 		inMemoryStore: &keyDir,
@@ -34,4 +36,6 @@ func main() {
 	if err != nil {
 		//
 	}
+	//testing.Benchmark(BenchmarkAppendToFile)
+	//testing.Benchmark()
 }

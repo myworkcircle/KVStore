@@ -6,7 +6,7 @@ import (
 )
 
 type Handler struct {
-	diskStore     *DiskStore
+	diskStore     StorageEngine
 	inMemoryStore *KeyValueStore
 }
 
@@ -24,19 +24,19 @@ func (h *Handler) put(key, value string) error {
 		return err
 	}
 
-	pos, err := h.diskStore.AppendToFile(serialisedRecord, key, value)
+	pos, err := h.diskStore.Put(serialisedRecord, key, []byte(value))
 	if err != nil {
 		return err
 	}
 	metadata := MetaData{
-		FileID:    h.diskStore.activeFileID,
+		FileID:    h.diskStore.GetActiveFileID(),
 		ValueSize: valueSize,
 		ValuePos:  pos,
 		TimeStamp: header.TimeStamp,
 	}
 	h.inMemoryStore.Put(key, metadata)
 	if h.diskStore.checkIfThresholdCrossed() {
-		_, err = h.diskStore.CreateNewFile()
+		err = h.diskStore.CreateNewFile()
 		if err != nil {
 			return err
 		}
@@ -47,7 +47,7 @@ func (h *Handler) put(key, value string) error {
 
 func (j *Handler) get(key string) (string, error) {
 	metaData := j.inMemoryStore.Get(key)
-	byteValue, err := j.diskStore.GetValue(metaData)
+	byteValue, err := j.diskStore.Get(metaData)
 	if err != nil {
 		return "", err
 	}

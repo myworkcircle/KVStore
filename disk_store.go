@@ -13,11 +13,12 @@ type DiskStore struct {
 	currentActiveFile int
 	activeFileID      string
 	threshold         int64
-	keyDir            *KeyValueStore
+	keyDir            *KeyValueStore // per file or single for whole caskDB?
 }
 
 func NewDiskStore(directoryName string, currentActiveFile int, activeFileID string, threshold int64) *DiskStore {
-	return &DiskStore{directoryName: directoryName, currentActiveFile: currentActiveFile, activeFileID: activeFileID, threshold: threshold}
+	return &DiskStore{directoryName: directoryName, currentActiveFile: currentActiveFile, activeFileID: activeFileID,
+		threshold: threshold}
 }
 
 func (ds *DiskStore) Open(name string) {
@@ -33,37 +34,36 @@ func (ds *DiskStore) Open(name string) {
 	ds.directoryName = "/Users/pallavagarwal/Documents/CaskDB/data_store"
 	ds.currentActiveFile = -1
 	ds.threshold = 20
-	file, err := ds.CreateNewFile()
+	err = ds.CreateNewFile()
 	if err != nil {
 		fmt.Println(err)
-	} else {
-		ds.activeFileID = file.Name()
 	}
 	//defer os.RemoveAll(name)
 }
 
-func (ds *DiskStore) CreateNewFile() (*os.File, error) {
+func (ds *DiskStore) CreateNewFile() error {
 	ds.currentActiveFile += 1
 	filePath := ds.directoryName + "/file-" + strconv.FormatInt(int64(ds.currentActiveFile), 16)
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_APPEND, 0755)
 	if err != nil {
 		if errors.Is(err, &os.PathError{}) {
 			fmt.Println("file already exists")
+			return nil
 		} else {
 			fmt.Println(err)
-			return nil, err
+			return err
 		}
 	}
 	ds.activeFileID = file.Name()
-	return file, nil
+	return nil
 }
 
 func (ds *DiskStore) GetActiveFileID() string {
 	return ds.activeFileID
 }
 
-func (ds *DiskStore) AppendToFile(fileToOpen string, data []byte, key string, value []byte) (int64, error) {
-	file, err := os.OpenFile(fileToOpen, os.O_APPEND|os.O_WRONLY, 0755)
+func (ds *DiskStore) Put(data []byte, key string, value []byte) (int64, error) {
+	file, err := os.OpenFile(ds.activeFileID, os.O_APPEND|os.O_WRONLY, 0755)
 	if err != nil {
 		fmt.Printf("error while opening file for write: %s", err)
 		return 0, err
@@ -71,7 +71,7 @@ func (ds *DiskStore) AppendToFile(fileToOpen string, data []byte, key string, va
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			fmt.Println("AppendToFile error while closing file: ", err)
+			fmt.Println("Put error while closing file: ", err)
 		}
 	}(file)
 
@@ -103,7 +103,7 @@ func (ds *DiskStore) AppendToFile(fileToOpen string, data []byte, key string, va
 	return offset, nil
 }
 
-func (ds *DiskStore) GetValue(metadata MetaData) ([]byte, error) {
+func (ds *DiskStore) Get(metadata MetaData) ([]byte, error) {
 	file, err := os.Open(metadata.FileID)
 	if err != nil {
 		fmt.Println("error while reading file: ", err)
@@ -137,46 +137,6 @@ func (ds *DiskStore) checkIfThresholdCrossed() bool {
 	}
 	return false
 }
-
-//func (ds *DiskStore) Compaction() error {
-//	tempFile, err := os.Create(ds.directoryName)
-//	if err != nil {
-//		fmt.Println("error while creating temp file: ", err)
-//		return err
-//	}
-//	for key, val := range ds.keyDir.store {
-//		if val.FileID != ds.activeFileID {
-//			value, getErr := ds.GetValue(MetaData{
-//				FileID:    val.FileID,
-//				ValueSize: val.ValueSize,
-//				ValuePos:  val.ValuePos,
-//				TimeStamp: val.TimeStamp,
-//			})
-//			if getErr != nil {
-//
-//			}
-//			ds.AppendToFile(key, value)
-//		}
-//	}
-//	return nil
-//}
-//
-//func (ds *DiskStore) listFilesInDir() ([]os.FileInfo, error) {
-//	entries, err := os.ReadDir(ds.directoryName)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	filesInfo := make([]os.FileInfo, len(entries))
-//	for _, entry := range entries {
-//		file, err := entry.Info()
-//		if err != nil {
-//			fmt.Println("error while reading file: ", err)
-//		}
-//		filesInfo = append(filesInfo, file)
-//	}
-//	return filesInfo, nil
-//}
 
 func (ds *DiskStore) close() {
 }

@@ -33,9 +33,40 @@ func main() {
 	fmt.Println("===============")
 
 	err = handler.put("two-2", "Value-2")
+
+	// ==========================================
+
+	segmentDB, err := NewSegmentDB("/Users/pallavagarwal/Documents/CaskDB/data_store", 4096, &keyDir)
 	if err != nil {
-		//
+
 	}
-	//testing.Benchmark(BenchmarkAppendToFile)
-	//testing.Benchmark()
+	err = segmentDB.CreateNewFile()
+	err = handler.put("one-1", "Value-1")
+	if err != nil {
+		return
+	}
+
+	handler2 := Handler{
+		diskStore:     segmentDB,
+		inMemoryStore: &keyDir,
+	}
+
+	val21, err := handler2.get("one-1")
+	if err == nil {
+		fmt.Println("value for key: one-1 :", val21)
+	}
+	fmt.Println("===============")
+
+	err = handler.put("two", "Value-2")
+	if err != nil {
+		return
+	}
+	val22, err := handler2.get("two")
+	if err == nil {
+		fmt.Println("value for key: two :", val22)
+	}
+	fmt.Println("===============")
+
+	err = handler.put("two-2", "Value-2")
+
 }

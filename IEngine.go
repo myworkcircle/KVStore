@@ -5,5 +5,5 @@ type StorageEngine interface {
 	Get(data MetaData) ([]byte, error)
 	GetActiveFileID() string
 	checkIfThresholdCrossed() bool
-	CreateNewFile() error
+	CreateNewFile(fileHandlerStrategy func(string, int) (FileRespository, error)) error
 }

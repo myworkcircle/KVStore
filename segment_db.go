@@ -20,7 +20,6 @@ func NewSegmentDB(directoryName string, threshold int64, keyValueStore *KeyValue
 	if err != nil {
 		if errors.Is(err, os.ErrExist) {
 			fmt.Println("Directory already exists")
-			return nil, err
 		} else {
 			fmt.Println("Error while creating directory: ", err)
 			panic(err)
@@ -37,15 +36,16 @@ func NewSegmentDB(directoryName string, threshold int64, keyValueStore *KeyValue
 	return ds, nil
 }
 
-func (ds *SegmentDB) CreateNewFile() error {
-	fileDao, err := NewFileDao(ds.directoryName+"/file-", ds.currentFileNum+1)
+func (ds *SegmentDB) CreateNewFile(fileHandlerStrategy func(string, int) (FileRespository, error)) error {
+	fileRepostiory, err := fileHandlerStrategy(ds.directoryName+"/file-", ds.currentFileNum+1)
 	if err != nil {
 		fmt.Println("Error while creating new file: ", err)
 		return err
 	}
 	ds.currentFileNum = ds.currentFileNum + 1
-	ds.activeFileID = fileDao.reader.Name()
-	ds.fileDao = fileDao
+	ds.activeFileID = fileRepostiory.GetFileName()
+	fmt.Println("New File ID: ", ds.activeFileID)
+	ds.fileDao = fileRepostiory
 	return nil
 }
 

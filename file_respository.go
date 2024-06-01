@@ -5,4 +5,5 @@ type FileRespository interface {
 	SaveString(string) (int64, error)
 	Get(int, int64) ([]byte, error)
 	GetOffset() int64
+	GetFileName() string
 }

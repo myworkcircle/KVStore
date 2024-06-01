@@ -29,7 +29,7 @@ func BenchmarkTestAppendToFile(b *testing.B) {
 }
 
 func BenchmarkTestAppendToFileWithBufio(b *testing.B) {
-	fileDao, _ := NewFileDao("/Users/pallavagarwal/Documents/CaskDB/data_store/file-0", 0)
+	fileDao, _ := NewFileBufioDao("/Users/pallavagarwal/Documents/CaskDB/data_store/file-0", 0)
 
 	ds := SegmentDB{
 		directoryName:  "/Users/pallavagarwal/Documents/CaskDB/data_store",

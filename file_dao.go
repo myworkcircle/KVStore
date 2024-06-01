@@ -14,13 +14,12 @@ type FileDao struct {
 	offset int64
 }
 
-func NewFileDao(path string, fileId int) (*FileDao, error) {
+func NewFileDao(path string, fileId int) (FileRespository, error) {
 	filePath := path + strconv.FormatInt(int64(fileId), 16)
 	writer, err := os.OpenFile(filePath, os.O_CREATE|os.O_APPEND, 0755)
 	if err != nil {
 		if errors.Is(err, &os.PathError{}) {
 			fmt.Println("file already exists")
-			return nil, err
 		} else {
 			fmt.Println(err)
 			return nil, err
@@ -82,4 +81,8 @@ func (f *FileDao) Get(bytesToRead int, offset int64) ([]byte, error) {
 
 func (f *FileDao) GetOffset() int64 {
 	return f.offset
+}
+
+func (f *FileDao) GetFileName() string {
+	return f.reader.Name()
 }

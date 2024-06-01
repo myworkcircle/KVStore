@@ -15,13 +15,12 @@ type FileBufioDao struct {
 	offset int64
 }
 
-func NewFileBufioDao(path string, fileId int) (*FileBufioDao, error) {
+func NewFileBufioDao(path string, fileId int) (FileRespository, error) {
 	filePath := path + strconv.FormatInt(int64(fileId), 16)
 	writerInstance, err := os.OpenFile(filePath, os.O_CREATE|os.O_APPEND, 0755)
 	if err != nil {
 		if errors.Is(err, &os.PathError{}) {
 			fmt.Println("file already exists")
-			return nil, err
 		} else {
 			fmt.Println(err)
 			return nil, err
@@ -39,12 +38,12 @@ func NewFileBufioDao(path string, fileId int) (*FileBufioDao, error) {
 		}
 	}
 
-	fileDao := &FileBufioDao{
+	fileBufioDao := &FileBufioDao{
 		writer: writer,
 		reader: reader,
 		offset: 0,
 	}
-	return fileDao, nil
+	return fileBufioDao, nil
 }
 
 func (f *FileBufioDao) Save(data []byte) (int64, error) {
@@ -84,4 +83,8 @@ func (f *FileBufioDao) Get(bytesToRead int, offset int64) ([]byte, error) {
 
 func (f *FileBufioDao) GetOffset() int64 {
 	return f.offset
+}
+
+func (f *FileBufioDao) GetFileName() string {
+	return f.reader.Name()
 }

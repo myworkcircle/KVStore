@@ -63,7 +63,7 @@ func (ds *DiskStore) GetActiveFileID() string {
 }
 
 func (ds *DiskStore) Put(data []byte, key string, value []byte) (int64, error) {
-	file, err := os.OpenFile(ds.activeFileID, os.O_APPEND|os.O_WRONLY, 0755)
+	file, err := os.OpenFile(ds.activeFileID, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0755)
 	if err != nil {
 		fmt.Printf("error while opening file for write: %s", err)
 		return 0, err

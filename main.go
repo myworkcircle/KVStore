@@ -52,6 +52,12 @@ func main() {
 		inMemoryStore: &keyDir,
 	}
 
+	err = handler2.put("one-1", "Value-1")
+	if err != nil {
+		fmt.Printf("Error | while putting value for key: %s err: %s\n", "one-1", err)
+		return
+	}
+
 	val21, err := handler2.get("one-1")
 	if err == nil {
 		fmt.Println("value for key: one-1: ", val21)

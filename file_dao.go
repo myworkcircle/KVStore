@@ -16,7 +16,7 @@ type FileDao struct {
 
 func NewFileDao(path string, fileId int) (FileRespository, error) {
 	filePath := path + strconv.FormatInt(int64(fileId), 16)
-	writer, err := os.OpenFile(filePath, os.O_CREATE|os.O_APPEND, 0755)
+	writer, err := os.OpenFile(filePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0755)
 	if err != nil {
 		if errors.Is(err, &os.PathError{}) {
 			fmt.Println("file already exists")
@@ -44,7 +44,7 @@ func NewFileDao(path string, fileId int) (FileRespository, error) {
 	return fileDao, nil
 }
 
-func (f *FileDao) Save(data []byte) (int64, error) {
+func (f *FileDao) Save(data []byte, _ bool) (int64, error) {
 	write, err := f.writer.Write(data)
 	if err != nil {
 		return 0, err
@@ -54,7 +54,7 @@ func (f *FileDao) Save(data []byte) (int64, error) {
 	return offset, nil
 }
 
-func (f *FileDao) SaveString(data string) (int64, error) {
+func (f *FileDao) SaveString(data string, _ bool) (int64, error) {
 	write, err := f.writer.WriteString(data)
 	if err != nil {
 		return 0, err

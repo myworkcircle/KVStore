@@ -35,6 +35,7 @@ func (h *Handler) put(key, value string) error {
 		TimeStamp: header.TimeStamp,
 	}
 	h.inMemoryStore.Put(key, metadata)
+
 	//if h.diskStore.checkIfThresholdCrossed() {
 	//	err = h.diskStore.CreateNewFile()
 	//	if err != nil {

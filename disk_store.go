@@ -8,6 +8,7 @@ import (
 	"strconv"
 )
 
+// DiskStore : Database layer providing all CRUD operations
 type DiskStore struct {
 	directoryName     string
 	currentActiveFile int

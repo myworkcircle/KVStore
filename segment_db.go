@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// SegmentDB : DB layer for all CRUD operations
 type SegmentDB struct {
 	directoryName  string
 	threshold      int64
